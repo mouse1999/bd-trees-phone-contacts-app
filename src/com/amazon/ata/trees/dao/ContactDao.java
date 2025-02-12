@@ -5,7 +5,9 @@ import com.amazon.ata.trees.model.Name;
 import com.amazon.ata.trees.model.SortBy;
 import com.amazon.ata.trees.model.SortOrder;
 
+import java.util.Comparator;
 import java.util.SortedMap;
+import java.util.TreeMap;
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
@@ -23,8 +25,8 @@ public class ContactDao {
 
     @Inject
     public ContactDao() {
-        this.contactsSortedByFirstName = null;
-        this.contactsSortedByLastName = null;
+        this.contactsSortedByFirstName = new TreeMap<>(Comparator.comparing(Name::getFirstName));
+        this.contactsSortedByLastName = new TreeMap<>(Comparator.comparing(Name::getLastName));
     }
 
     /**
@@ -46,8 +48,22 @@ public class ContactDao {
      * @return map of name to contacts in requested sorted order.
      */
     public SortedMap<Name, Contact> getContacts(SortBy sortBy, SortOrder sortOrder) {
-        // TODO implement
-        return null;
+        if (sortBy == null) {
+            sortBy = SortBy.LAST_NAME; // Default to sorting by last name
+        }
+        if (sortOrder == null) {
+            sortOrder = SortOrder.ASCENDING; // Default to ascending order
+        }
+
+        // Choose the correct sorted map
+        SortedMap<Name, Contact> selectedMap = (sortBy == SortBy.FIRST_NAME)
+                ? contactsSortedByFirstName
+                : contactsSortedByLastName;
+
+        // Return ascending or descending order
+        return (sortOrder == SortOrder.ASCENDING)
+                ? selectedMap
+                : ((TreeMap<Name, Contact>) selectedMap).descendingMap();
     }
 
     /**
@@ -69,8 +85,28 @@ public class ContactDao {
      * order.
      */
     public SortedMap<Name, Contact> getContactsStartingAt(Name startKey, SortBy sortBy, SortOrder sortOrder) {
-        // TODO implement
-        return null;
+        if (sortBy == null) {
+            sortBy = SortBy.LAST_NAME; // Default to sorting by last name
+        }
+        if (sortOrder == null) {
+            sortOrder = SortOrder.ASCENDING; // Default to ascending order
+        }
+
+        // Choose the correct sorted map
+        SortedMap<Name, Contact> selectedMap = (sortBy == SortBy.FIRST_NAME)
+                ? contactsSortedByFirstName
+                : contactsSortedByLastName;
+
+
+
+        // Return ascending or descending order
+        return (sortOrder == SortOrder.ASCENDING)
+                ? selectedMap.tailMap(startKey)
+                : new TreeMap<>(selectedMap).descendingMap().tailMap(startKey);
     }
 
+    //A
+    //B
+    //C
+    //D
 }
